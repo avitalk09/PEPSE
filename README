@@ -1,0 +1,59 @@
+avital.klein2
+336387303
+
+1. Implementation of Avatar
+    Packages/Classes: My avatar package contains two files, one for the avatar itself and one for an enum i
+                      used inside the avatar class (movementState).
+                      I decided to add an enum to avoid having to keep multiple boolean fields (isRunning,
+                      isStanding, isJumping) it keeps the state field cleaner.
+
+    Changes of state: I added a field inside the avatar of type movementState, it gets updated as the avatar
+                      moves to always reflect the state it's in. Every time the movementState gets updated
+                      renderer().setRenderable is used to change the set of images the avatar is rendered with
+                      (creating the movement animation).
+
+    Energy display:   To update the percentage of energy (the number itself not the rendering) i created 2
+                      function inside the avatar - increaseEnergy, reduceEnergy, the avatar calls them as he
+                      runs / jumps / eats a fruit or just relaxes.
+
+                      I added a separate class inside pepse.world that is responsible for rendering the
+                      percentage of energy the avatar has at any time, it uses a game object and a text
+                      renderable. This EnergyTextDisplay class has an update method that can be used to change
+                      the number this renderable shows.
+
+                      The avatar has a field to hold a callback method, when we create the energy
+                      displayer in the manager we set the callback in the avatar to be the update function of
+                      this energyDisplay object. Inside the avatar anytime we call a method to increase or
+                      decrease the energy we also use this callback to update the display.
+
+                      Using a callback allows the avatar to notify the display only when the energy value
+                      changes, this design avoids unnecessary updates every frame.
+
+                      In all, the avatar is responsible only for managing the energy value while the visual
+                      representation is handled by the EnergyTextDisplay, this separation follows the single
+                      responsibility principle and allows the energy display to be changed without changing
+                      the avatar's logic.
+
+2. Trees package
+    I divided the trees package into 3 classes.
+    Flora:  The flora class acts as a factory for creating trees leaves and fruits in a given range (using its
+            createInRange method. it groups together the creation of all tress an fruit to a single function
+            making it cleaner and simpler.
+
+    Tree:   The sole purpose of this class is to generate a list of object that will represent a tree.
+            The tree class is a class with only static methods, and only one is public - createTree.
+            This method creates a trunk, then add leaves and fruit on it and returns a list of game objects to
+            be added to the collection. The trunk and leaves are represented using blocks, only the fruits are
+            a separate gameObject. (because they are the only one with a specific more special task)
+
+    Fruit: The fruit class extends game object, each fruit has a boolean field 'available' that represent if
+           it has been eaten in the last cycle or if it is available for the avatar to eat. When a fruit
+           collides with an object with the AvatarTag it becomes unavailable and transparent (the renderer is
+           set to null) for a whole cycle.
+           I used a schedule task to handle fruit respawning after a full cycle, this allows time based
+           behavior to be handled without using manual time tracking in update functions. After a full cycle
+           has passed since creating the schedule it calls 'makeAvailable' that reset the fruit to being
+           visible and eatable again.
+
+
+
